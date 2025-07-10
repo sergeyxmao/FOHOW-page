@@ -36,94 +36,89 @@
             top: 0;
         }
         .product-table tr:hover {
-            background-color: #f5f5f5;
+            background-color: #f1f8ff;
         }
         .price {
             text-align: right;
             white-space: nowrap;
+            cursor: pointer;
         }
         .category {
             font-weight: bold;
             background-color: #e9ecef;
         }
-        .product-list {
-            column-count: 2;
-            column-gap: 30px;
-            margin-bottom: 30px;
+        .admin-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
         }
-        .product-list li {
-            margin-bottom: 8px;
-            break-inside: avoid;
+        .admin-btn:hover {
+            background-color: #1a252f;
         }
-        @media (max-width: 768px) {
-            .product-list {
-                column-count: 1;
-            }
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+        .password-form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+        .password-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            box-sizing: border-box;
+        }
+        .password-form button {
+            padding: 10px 20px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .password-form button:hover {
+            background-color: #1a252f;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
+    <button class="admin-btn" onclick="showPasswordModal()">Админ</button>
+    
+    <div class="password-modal" id="passwordModal">
+        <div class="password-form">
+            <h3>Введите пароль</h3>
+            <input type="password" id="passwordInput" placeholder="Пароль">
+            <button onclick="checkPassword()">Войти</button>
+            <p class="error-message" id="errorMessage">Неверный пароль!</p>
+        </div>
+    </div>
+    
     <h1>Каталог продукции</h1>
     
-    <h2>Список продукции</h2>
-    <ul class="product-list">
-        <li>Кальций «Хайцаогай» - 2,816 ₽</li>
-        <li>Капсулы «Сюэчинфу» - 5,852 ₽</li>
-        <li>Капсулы «Тасуан» 120 шт. - 1,353 ₽</li>
-        <li>Эликсир «Феникс» - 2,255 ₽</li>
-        <li>Эликсир «Легенда Феникса» - 3,927 ₽</li>
-        <li>Эликсир «Феникс юбилейный» - 2,937 ₽</li>
-        <li>Эликсир «Три драгоценности» - 3,597 ₽</li>
-        <li>Капсулы «Линчжи» - 1,694 ₽</li>
-        <li>Чай «Лювэй» - 907.5 ₽</li>
-        <li>Питательные пастилки «Гаосен» - 3,927 ₽</li>
-        <li>Фруктовая паста «Роза» - 1,127.5 ₽</li>
-        <li>Эликсир «Санцин» - 3,597 ₽</li>
-        <li>Новый чай «Босс» - 3,377 ₽</li>
-        <li>Напиток с пептидами женьшеня Multi Power - 6,765 ₽</li>
-        <li>Чай «ShunCi» - 4,510 ₽</li>
-        <li>Капсулы с пептидами «Молодость плюс» - 42,735 ₽</li>
-        <li>Леденцы для горла «Легкое Дыхание» - 4,070 ₽</li>
-        <li>Фруктовые леденцы «Витаминный заряд» - 4,070 ₽</li>
-        <li>Кофе «№ММ Ян-шэн» - 1,815 ₽</li>
-        <li>Гель Алоэ - 907.5 ₽</li>
-        <li>Зубная паста с кордицепсом - 907.5 ₽</li>
-        <li>Комплект гигиенических прокладок - 1,815 ₽</li>
-        <li>Ежедневные прокладки - 1,925 ₽</li>
-        <li>Увлажняющий гель FOHOW для лица и тела - 6,765 ₽</li>
-        <li>Новый массажный гель Ян-шэн FOHOW - 4,070 ₽</li>
-        <li>Ионный массажер (бьюти-девайс) - 33,770 ₽</li>
-        <li>Активатор водородной воды «Ян-шэн Н2» - 33,770 ₽</li>
-        <li>Фасциальный массажер - 22,495 ₽</li>
-        <li>Пластырь «Magic Инь-Ян» - 5,632 ₽</li>
-        <li>Эфирное массажное масло Fohow - 6,215 ₽</li>
-        <li>Легкий липолиз крем FOHOW - 4,532 ₽</li>
-        <li>Графеновая энергетическая накладка-массажер на пояс - 42,735 ₽</li>
-        <li>Графеновый энергетический жилет-массажер для спины - 42,735 ₽</li>
-        <li>Восстанавливающая сыворотка с минералами - 16,885 ₽</li>
-        <li>Энергетический Ян-шэн бальзам - 4,532 ₽</li>
-        <li>Увлажняющая регенерирующая маска Fohow (10 шт) - 11,220 ₽</li>
-        <li>Полипептидный лифтинг-комплекс против морщин (базовый набор) - 20,295 ₽</li>
-        <li>Полипептидный восстанавливающий комплекс (профессиональный набор) - 33,770 ₽</li>
-        <li>Увлажняющие патчи с экстрактом кордицепса - 5,082 ₽</li>
-        <li>Эссенция от морщин вокруг глаз с экстрактом кордицепса - 5,082 ₽</li>
-        <li>Фарадотерапевтический обхват для поясницы - 37,070 ₽</li>
-        <li>Фарадотерапевтический обхват для шеи - 9,020 ₽</li>
-        <li>Фарадотерапевтические наколенники - 37,070 ₽</li>
-        <li>Шелковое одеяло - 90,200 ₽</li>
-        <li>Энергетическое магнитное одеяло - 73,150 ₽</li>
-        <li>Комплект функционального постельного белья 6 в 1 - 118,250 ₽</li>
-        <li>Набор функциональных постельных принадлежностей с квантовым полем - 163,350 ₽</li>
-        <li>Массажная подушка из натурального латекса - 22,495 ₽</li>
-        <li>Тампонированные капсулы "Гуйфэй Бао" - 2,255 ₽</li>
-        <li>Любая Ян-Шэн продукция на выбор (380H000) - 42,900 ₽</li>
-        <li>Базовый Ян-шэн набор - 42,900 ₽</li>
-        <li>Капсулы с пептидами «Молодость плюс» *1 упаковка - 42,900 ₽</li>
-        <li>Пастилки «Движение плюс» * 2 упаковки - 42,900 ₽</li>
-        <li>Набор для интимной гигиены женщины - 42,900 ₽</li>
-    </ul>
-    
-    <h2>Таблица продукции</h2>
     <table class="product-table">
         <thead>
             <tr>
@@ -132,75 +127,130 @@
             </tr>
         </thead>
         <tbody>
-            <tr><td>Кальций «Хайцаогай»</td><td class="price">2,816</td></tr>
-            <tr><td>Капсулы «Сюэчинфу»</td><td class="price">5,852</td></tr>
-            <tr><td>Капсулы «Тасуан» 120 шт.</td><td class="price">1,353</td></tr>
-            <tr><td>Эликсир «Феникс»</td><td class="price">2,255</td></tr>
-            <tr><td>Эликсир «Легенда Феникса»</td><td class="price">3,927</td></tr>
-            <tr><td>Эликсир «Феникс юбилейный»</td><td class="price">2,937</td></tr>
-            <tr><td>Эликсир «Три драгоценности»</td><td class="price">3,597</td></tr>
-            <tr><td>Капсулы «Линчжи»</td><td class="price">1,694</td></tr>
-            <tr><td>Чай «Лювэй»</td><td class="price">907.5</td></tr>
-            <tr><td>Питательные пастилки «Гаосен»</td><td class="price">3,927</td></tr>
-            <tr><td>Фруктовая паста «Роза»</td><td class="price">1,127.5</td></tr>
-            <tr><td>Эликсир «Санцин»</td><td class="price">3,597</td></tr>
-            <tr><td>Новый чай «Босс»</td><td class="price">3,377</td></tr>
-            <tr><td>Напиток с пептидами женьшеня Multi Power</td><td class="price">6,765</td></tr>
-            <tr><td>Чай «ShunCi»</td><td class="price">4,510</td></tr>
-            <tr><td>Капсулы с пептидами «Молодость плюс»</td><td class="price">42,735</td></tr>
-            <tr><td>Леденцы для горла «Легкое Дыхание»</td><td class="price">4,070</td></tr>
-            <tr><td>Фруктовые леденцы «Витаминный заряд»</td><td class="price">4,070</td></tr>
-            <tr><td>Кофе «№ММ Ян-шэн»</td><td class="price">1,815</td></tr>
-            <tr><td>Гель Алоэ</td><td class="price">907.5</td></tr>
-            <tr><td>Зубная паста с кордицепсом</td><td class="price">907.5</td></tr>
-            <tr><td>Комплект гигиенических прокладок</td><td class="price">1,815</td></tr>
-            <tr><td>Ежедневные прокладки</td><td class="price">1,925</td></tr>
-            <tr><td>Увлажняющий гель FOHOW для лица и тела</td><td class="price">6,765</td></tr>
-            <tr><td>Новый массажный гель Ян-шэн FOHOW</td><td class="price">4,070</td></tr>
-            <tr><td>Ионный массажер (бьюти-девайс)</td><td class="price">33,770</td></tr>
-            <tr><td>Активатор водородной воды «Ян-шэн Н2»</td><td class="price">33,770</td></tr>
-            <tr><td>Фасциальный массажер</td><td class="price">22,495</td></tr>
-            <tr><td>Пластырь «Magic Инь-Ян»</td><td class="price">5,632</td></tr>
-            <tr><td>Эфирное массажное масло Fohow</td><td class="price">6,215</td></tr>
-            <tr><td>Легкий липолиз крем FOHOW</td><td class="price">4,532</td></tr>
-            <tr><td>Графеновая энергетическая накладка-массажер на пояс</td><td class="price">42,735</td></tr>
-            <tr><td>Графеновый энергетический жилет-массажер для спины</td><td class="price">42,735</td></tr>
-            <tr><td>Восстанавливающая сыворотка с минералами</td><td class="price">16,885</td></tr>
-            <tr><td>Энергетический Ян-шэн бальзам</td><td class="price">4,532</td></tr>
-            <tr><td>Увлажняющая регенерирующая маска Fohow (10 шт)</td><td class="price">11,220</td></tr>
-            <tr><td>Полипептидный лифтинг-комплекс против морщин (базовый набор)</td><td class="price">20,295</td></tr>
-            <tr><td>Полипептидный восстанавливающий комплекс (профессиональный набор)</td><td class="price">33,770</td></tr>
-            <tr><td>Увлажняющие патчи с экстрактом кордицепса</td><td class="price">5,082</td></tr>
-            <tr><td>Эссенция от морщин вокруг глаз с экстрактом кордицепса</td><td class="price">5,082</td></tr>
-            <tr><td>Фарадотерапевтический обхват для поясницы</td><td class="price">37,070</td></tr>
-            <tr><td>Фарадотерапевтический обхват для шеи</td><td class="price">9,020</td></tr>
-            <tr><td>Фарадотерапевтические наколенники</td><td class="price">37,070</td></tr>
-            <tr><td>Шелковое одеяло</td><td class="price">90,200</td></tr>
-            <tr><td>Энергетическое магнитное одеяло</td><td class="price">73,150</td></tr>
-            <tr><td>Комплект функционального постельного белья 6 в 1</td><td class="price">118,250</td></tr>
-            <tr><td>Набор функциональных постельных принадлежностей с квантовым полем</td><td class="price">163,350</td></tr>
-            <tr><td>Массажная подушка из натурального латекса</td><td class="price">22,495</td></tr>
-            <tr><td>Тампонированные капсулы "Гуйфэй Бао"</td><td class="price">2,255</td></tr>
+            <tr><td>Кальций «Хайцаогай»</td><td class="price" onclick="editPrice(this)">2,816</td></tr>
+            <tr><td>Капсулы «Сюэчинфу»</td><td class="price" onclick="editPrice(this)">5,852</td></tr>
+            <tr><td>Капсулы «Тасуан» 120 шт.</td><td class="price" onclick="editPrice(this)">1,353</td></tr>
+            <tr><td>Эликсир «Феникс»</td><td class="price" onclick="editPrice(this)">2,255</td></tr>
+            <tr><td>Эликсир «Легенда Феникса»</td><td class="price" onclick="editPrice(this)">3,927</td></tr>
+            <tr><td>Эликсир «Феникс юбилейный»</td><td class="price" onclick="editPrice(this)">2,937</td></tr>
+            <tr><td>Эликсир «Три драгоценности»</td><td class="price" onclick="editPrice(this)">3,597</td></tr>
+            <tr><td>Капсулы «Линчжи»</td><td class="price" onclick="editPrice(this)">1,694</td></tr>
+            <tr><td>Чай «Лювэй»</td><td class="price" onclick="editPrice(this)">907.5</td></tr>
+            <tr><td>Питательные пастилки «Гаосен»</td><td class="price" onclick="editPrice(this)">3,927</td></tr>
+            <tr><td>Фруктовая паста «Роза»</td><td class="price" onclick="editPrice(this)">1,127.5</td></tr>
+            <tr><td>Эликсир «Санцин»</td><td class="price" onclick="editPrice(this)">3,597</td></tr>
+            <tr><td>Новый чай «Босс»</td><td class="price" onclick="editPrice(this)">3,377</td></tr>
+            <tr><td>Напиток с пептидами женьшеня Multi Power</td><td class="price" onclick="editPrice(this)">6,765</td></tr>
+            <tr><td>Чай «ShunCi»</td><td class="price" onclick="editPrice(this)">4,510</td></tr>
+            <tr><td>Капсулы с пептидами «Молодость плюс»</td><td class="price" onclick="editPrice(this)">42,735</td></tr>
+            <tr><td>Леденцы для горла «Легкое Дыхание»</td><td class="price" onclick="editPrice(this)">4,070</td></tr>
+            <tr><td>Фруктовые леденцы «Витаминный заряд»</td><td class="price" onclick="editPrice(this)">4,070</td></tr>
+            <tr><td>Кофе «№ММ Ян-шэн»</td><td class="price" onclick="editPrice(this)">1,815</td></tr>
+            <tr><td>Гель Алоэ</td><td class="price" onclick="editPrice(this)">907.5</td></tr>
+            <tr><td>Зубная паста с кордицепсом</td><td class="price" onclick="editPrice(this)">907.5</td></tr>
+            <tr><td>Комплект гигиенических прокладок</td><td class="price" onclick="editPrice(this)">1,815</td></tr>
+            <tr><td>Ежедневные прокладки</td><td class="price" onclick="editPrice(this)">1,925</td></tr>
+            <tr><td>Увлажняющий гель FOHOW для лица и тела</td><td class="price" onclick="editPrice(this)">6,765</td></tr>
+            <tr><td>Новый массажный гель Ян-шэн FOHOW</td><td class="price" onclick="editPrice(this)">4,070</td></tr>
+            <tr><td>Ионный массажер (бьюти-девайс)</td><td class="price" onclick="editPrice(this)">33,770</td></tr>
+            <tr><td>Активатор водородной воды «Ян-шэн Н2»</td><td class="price" onclick="editPrice(this)">33,770</td></tr>
+            <tr><td>Фасциальный массажер</td><td class="price" onclick="editPrice(this)">22,495</td></tr>
+            <tr><td>Пластырь «Magic Инь-Ян»</td><td class="price" onclick="editPrice(this)">5,632</td></tr>
+            <tr><td>Эфирное массажное масло Fohow</td><td class="price" onclick="editPrice(this)">6,215</td></tr>
+            <tr><td>Легкий липолиз крем FOHOW</td><td class="price" onclick="editPrice(this)">4,532</td></tr>
+            <tr><td>Графеновая энергетическая накладка-массажер на пояс</td><td class="price" onclick="editPrice(this)">42,735</td></tr>
+            <tr><td>Графеновый энергетический жилет-массажер для спины</td><td class="price" onclick="editPrice(this)">42,735</td></tr>
+            <tr><td>Восстанавливающая сыворотка с минералами</td><td class="price" onclick="editPrice(this)">16,885</td></tr>
+            <tr><td>Энергетический Ян-шэн бальзам</td><td class="price" onclick="editPrice(this)">4,532</td></tr>
+            <tr><td>Увлажняющая регенерирующая маска Fohow (10 шт)</td><td class="price" onclick="editPrice(this)">11,220</td></tr>
+            <tr><td>Полипептидный лифтинг-комплекс против морщин (базовый набор)</td><td class="price" onclick="editPrice(this)">20,295</td></tr>
+            <tr><td>Полипептидный восстанавливающий комплекс (профессиональный набор)</td><td class="price" onclick="editPrice(this)">33,770</td></tr>
+            <tr><td>Увлажняющие патчи с экстрактом кордицепса</td><td class="price" onclick="editPrice(this)">5,082</td></tr>
+            <tr><td>Эссенция от морщин вокруг глаз с экстрактом кордицепса</td><td class="price" onclick="editPrice(this)">5,082</td></tr>
+            <tr><td>Фарадотерапевтический обхват для поясницы</td><td class="price" onclick="editPrice(this)">37,070</td></tr>
+            <tr><td>Фарадотерапевтический обхват для шеи</td><td class="price" onclick="editPrice(this)">9,020</td></tr>
+            <tr><td>Фарадотерапевтические наколенники</td><td class="price" onclick="editPrice(this)">37,070</td></tr>
+            <tr><td>Шелковое одеяло</td><td class="price" onclick="editPrice(this)">90,200</td></tr>
+            <tr><td>Энергетическое магнитное одеяло</td><td class="price" onclick="editPrice(this)">73,150</td></tr>
+            <tr><td>Комплект функционального постельного белья 6 в 1</td><td class="price" onclick="editPrice(this)">118,250</td></tr>
+            <tr><td>Набор функциональных постельных принадлежностей с квантовым полем</td><td class="price" onclick="editPrice(this)">163,350</td></tr>
+            <tr><td>Массажная подушка из натурального латекса</td><td class="price" onclick="editPrice(this)">22,495</td></tr>
+            <tr><td>Тампонированные капсулы "Гуйфэй Бао"</td><td class="price" onclick="editPrice(this)">2,255</td></tr>
             <tr class="category"><td colspan="2">Наборы SOLO</td></tr>
-            <tr><td>Любая Ян-Шэн продукция на выбор (380H000)</td><td class="price">42,900</td></tr>
-            <tr><td>Базовый Ян-шэн набор</td><td class="price">42,900</td></tr>
-            <tr><td>Капсулы с пептидами «Молодость плюс» *1 упаковка</td><td class="price">42,900</td></tr>
-            <tr><td>Пастилки «Движение плюс» * 2 упаковки</td><td class="price">42,900</td></tr>
-            <tr><td>Набор для интимной гигиены женщины</td><td class="price">42,900</td></tr>
+            <tr><td>Любая Ян-Шэн продукция на выбор (380H000)</td><td class="price" onclick="editPrice(this)">42,900</td></tr>
+            <tr><td>Базовый Ян-шэн набор</td><td class="price" onclick="editPrice(this)">42,900</td></tr>
+            <tr><td>Капсулы с пептидами «Молодость плюс» *1 упаковка</td><td class="price" onclick="editPrice(this)">42,900</td></tr>
+            <tr><td>Пастилки «Движение плюс» * 2 упаковки</td><td class="price" onclick="editPrice(this)">42,900</td></tr>
+            <tr><td>Набор для интимной гигиены женщины</td><td class="price" onclick="editPrice(this)">42,900</td></tr>
             <tr class="category"><td colspan="2">Наборы PLUS</td></tr>
-            <tr><td>SOLO-00 + SOLO-00</td><td class="price">85,800</td></tr>
-            <tr><td>SOLO-01 + SOLO-02</td><td class="price">85,800</td></tr>
-            <tr><td>SOLO-01 + SOLO-03</td><td class="price">85,800</td></tr>
-            <tr><td>SOLO-02 + SOLO-03</td><td class="price">85,800</td></tr>
-            <tr><td>SOLO-04+ SOLO-04</td><td class="price">85,800</td></tr>
+            <tr><td>SOLO-00 + SOLO-00</td><td class="price" onclick="editPrice(this)">85,800</td></tr>
+            <tr><td>SOLO-01 + SOLO-02</td><td class="price" onclick="editPrice(this)">85,800</td></tr>
+            <tr><td>SOLO-01 + SOLO-03</td><td class="price" onclick="editPrice(this)">85,800</td></tr>
+            <tr><td>SOLO-02 + SOLO-03</td><td class="price" onclick="editPrice(this)">85,800</td></tr>
+            <tr><td>SOLO-04+ SOLO-04</td><td class="price" onclick="editPrice(this)">85,800</td></tr>
             <tr class="category"><td colspan="2">Наборы VIP</td></tr>
-            <tr><td>БЭМ + SOLO-00</td><td class="price">243,100</td></tr>
-            <tr><td>БЭМ + SOLO-04</td><td class="price">243,100</td></tr>
-            <tr><td>ТИМ + SOLO-00</td><td class="price">243,100</td></tr>
-            <tr><td>ТИМ + SOLO-04</td><td class="price">243,100</td></tr>
-            <tr><td>РЭМ + SOLO-00</td><td class="price">243,100</td></tr>
-            <tr><td>РЭМ + SOLO-04</td><td class="price">243,100</td></tr>
+            <tr><td>БЭМ + SOLO-00</td><td class="price" onclick="editPrice(this)">243,100</td></tr>
+            <tr><td>БЭМ + SOLO-04</td><td class="price" onclick="editPrice(this)">243,100</td></tr>
+            <tr><td>ТИМ + SOLO-00</td><td class="price" onclick="editPrice(this)">243,100</td></tr>
+            <tr><td>ТИМ + SOLO-04</td><td class="price" onclick="editPrice(this)">243,100</td></tr>
+            <tr><td>РЭМ + SOLO-00</td><td class="price" onclick="editPrice(this)">243,100</td></tr>
+            <tr><td>РЭМ + SOLO-04</td><td class="price" onclick="editPrice(this)">243,100</td></tr>
         </tbody>
     </table>
+
+    <script>
+        let isAdmin = false;
+        
+        function showPasswordModal() {
+            document.getElementById('passwordModal').style.display = 'flex';
+        }
+        
+        function hidePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+        }
+        
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === '1508') {
+                isAdmin = true;
+                hidePasswordModal();
+                alert('Режим администрирования включен. Теперь вы можете редактировать цены.');
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+        
+        function editPrice(element) {
+            if (!isAdmin) return;
+            
+            const currentPrice = element.textContent.replace(/,/g, '');
+            const newPrice = prompt('Введите новую цену:', currentPrice);
+            
+            if (newPrice !== null && newPrice !== '') {
+                const num = parseFloat(newPrice.replace(/,/g, ''));
+                if (!isNaN(num)) {
+                    element.textContent = num.toLocaleString('ru-RU');
+                } else {
+                    alert('Пожалуйста, введите корректное число');
+                }
+            }
+        }
+        
+        // Закрытие модального окна при клике вне его
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hidePasswordModal();
+            }
+        });
+        
+        // Закрытие по ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hidePasswordModal();
+            }
+        });
+    </script>
 </body>
 </html>
