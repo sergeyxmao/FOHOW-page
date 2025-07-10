@@ -6,16 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f5f6fa; }
-    .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px #0001; padding: 20px; position: relative; }
+    .container { max-width: 650px; margin: 30px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px #0001; padding: 20px; position: relative; }
     h1 { font-size: 1.6em; margin-bottom: 20px; text-align: center; letter-spacing: 1px; }
     .admin-btn { position: absolute; top: 20px; right: 24px; background: #228be6; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; z-index:2;}
     .admin-btn:active { background: #1559a5; }
     table { width: 100%; border-collapse: collapse; font-size: 1em; margin-top: 16px; }
-    th, td { padding: 10px 8px; text-align: left; word-break: break-word;}
+    th, td { padding: 10px 8px; text-align: left; }
+    th, td { border: 1px solid #e0e0e0; }
     th { background: #f0f3fa; font-weight: 600; }
     tr { transition: background 0.2s; }
     tr:hover { background: #eaf6fd; }
-    td.price-cell { cursor: pointer; }
+    td.price-cell, th.price-cell { white-space: nowrap; text-align: right; }
+    td.name-cell, th.name-cell { word-break: break-word; max-width: 1px; }
     tr.editing { background: #d6f5e8 !important; }
     input.price-input { width: 80px; padding: 6px; font-size: 1em; border: 1px solid #ccc; border-radius: 6px; }
     .save-btn { display: none; margin-top: 14px; background: #14ae5c; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 1em; cursor: pointer; }
@@ -34,6 +36,7 @@
       .admin-btn { right: 8px; top: 10px; padding: 8px 11px; font-size: 0.97em; }
       .save-btn { font-size: 0.97em; }
       .modal { min-width: 90vw; }
+      th.name-cell, td.name-cell { max-width: 70vw; }
     }
   </style>
 </head>
@@ -44,8 +47,8 @@
     <table id="priceTable">
       <thead>
         <tr>
-          <th>Название</th>
-          <th>Рубли</th>
+          <th class="name-cell">Название</th>
+          <th class="price-cell">Рубли</th>
         </tr>
       </thead>
       <tbody>
@@ -65,8 +68,8 @@
     </div>
   </div>
   <script>
-    // Исходные данные (ваш прайс)
-const defaultData = [
+    // Оригинальные данные
+    const defaultData = [
   {name: "Кальций «Хайцаогай»", price: 2816},
   {name: "Капсулы «Сюэчинфу»", price: 5852},
   {name: "Капсулы «Тасуан» 120 шт.", price: 1353},
@@ -132,19 +135,29 @@ const defaultData = [
   {name: "ТИМ + SOLO-04", price: 243100},
   {name: "РЭМ + SOLO-00", price: 243100},
   {name: "РЭМ + SOLO-04", price: 243100}
-];
+    ];
 
-    // Функция для загрузки данных из LocalStorage
+    // Округляем к сотням вверх (всегда)
+    function toHundreds(val) {
+      return Math.ceil(Number(val) / 100) * 100;
+    }
+
+    // Загрузка из LocalStorage
     function loadData() {
       const saved = localStorage.getItem('priceData');
       if (saved) {
-        try { return JSON.parse(saved); }
-        catch { return defaultData.slice(); }
+        try { 
+          return JSON.parse(saved).map(item => ({
+            ...item,
+            price: toHundreds(item.price)
+          }));
+        }
+        catch { return defaultData.map(i => ({...i, price: toHundreds(i.price)})); }
       }
-      return defaultData.slice();
+      return defaultData.map(i => ({...i, price: toHundreds(i.price)}));
     }
 
-    // Функция для сохранения в LocalStorage
+    // Сохраняем в LocalStorage
     function saveData(data) {
       localStorage.setItem('priceData', JSON.stringify(data));
     }
@@ -157,15 +170,16 @@ const defaultData = [
         const tr = document.createElement('tr');
         const nameTd = document.createElement('td');
         nameTd.textContent = item.name;
+        nameTd.className = "name-cell";
         const priceTd = document.createElement('td');
-        priceTd.classList.add('price-cell');
+        priceTd.className = "price-cell";
         priceTd.dataset.idx = idx;
         priceTd.tabIndex = isAdmin ? 0 : -1;
         if (isAdmin && editIndex === idx) {
           tr.classList.add('editing');
-          priceTd.innerHTML = `<input class="price-input" type="number" min="0" step="any" value="${item.price}" />`;
+          priceTd.innerHTML = `<input class="price-input" type="number" min="0" step="100" value="${item.price}" />`;
         } else {
-          priceTd.textContent = item.price;
+          priceTd.textContent = toHundreds(item.price);
         }
         tr.appendChild(nameTd);
         tr.appendChild(priceTd);
@@ -177,10 +191,9 @@ const defaultData = [
     let priceData = loadData();
     let editIndex = null;
 
-    // Первичная отрисовка
     renderTable();
 
-    // Модалка — админ вход
+    // Модалка
     const adminBtn = document.getElementById('adminBtn');
     const modalBg = document.getElementById('modalBg');
     const adminForm = document.getElementById('adminForm');
@@ -224,14 +237,14 @@ const defaultData = [
       }
     };
 
-    // Автоматически обновлять цену при вводе (после ухода с инпута)
+    // При выходе из поля
     document.querySelector('#priceTable tbody').addEventListener('focusout', function(e) {
       if (!isAdmin || editIndex === null) return;
       const input = e.target;
       if (input.classList.contains('price-input')) {
-        const val = Number(input.value);
+        let val = Number(input.value);
         if (!isNaN(val) && val >= 0) {
-          priceData[editIndex].price = val;
+          priceData[editIndex].price = toHundreds(val);
           renderTable(true);
         }
         editIndex = null;
@@ -240,7 +253,10 @@ const defaultData = [
 
     // Кнопка "Сохранить"
     document.getElementById('saveBtn').onclick = function() {
-      saveData(priceData);
+      saveData(priceData.map(item => ({
+        ...item,
+        price: toHundreds(item.price)
+      })));
       this.textContent = "Сохранено!";
       setTimeout(() => { this.textContent = "Сохранить"; }, 1200);
       renderTable(true);
@@ -250,6 +266,7 @@ const defaultData = [
     window.onload = () => {
       isAdmin = false;
       editIndex = null;
+      priceData = loadData();
       renderTable();
       document.getElementById('saveBtn').classList.remove('active');
     };
