@@ -6,12 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f5f6fa; }
-    .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px #0001; padding: 20px; }
+    .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px #0001; padding: 20px; position: relative; }
     h1 { font-size: 1.6em; margin-bottom: 20px; text-align: center; letter-spacing: 1px; }
-    .admin-btn { position: absolute; top: 20px; right: 24px; background: #228be6; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .admin-btn { position: absolute; top: 20px; right: 24px; background: #228be6; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; z-index:2;}
     .admin-btn:active { background: #1559a5; }
     table { width: 100%; border-collapse: collapse; font-size: 1em; margin-top: 16px; }
-    th, td { padding: 10px 8px; text-align: left; }
+    th, td { padding: 10px 8px; text-align: left; word-break: break-word;}
     th { background: #f0f3fa; font-weight: 600; }
     tr { transition: background 0.2s; }
     tr:hover { background: #eaf6fd; }
@@ -27,7 +27,6 @@
     .modal label { font-size: 1em; margin-bottom: 12px; display: block; }
     .modal .modal-btn { background: #228be6; color: #fff; border: none; padding: 8px 14px; border-radius: 7px; font-size: 1em; cursor: pointer; }
     .modal .modal-btn:active { background: #1559a5; }
-    /* Мобилка */
     @media (max-width: 700px) {
       .container { max-width: 98vw; margin: 10px 1vw; padding: 12px; }
       h1 { font-size: 1.2em; }
@@ -39,8 +38,8 @@
   </style>
 </head>
 <body>
-  <button class="admin-btn" id="adminBtn">Админ</button>
   <div class="container">
+    <button class="admin-btn" id="adminBtn">Админ</button>
     <h1>Прайс-лист</h1>
     <table id="priceTable">
       <thead>
@@ -164,7 +163,7 @@
         priceTd.tabIndex = isAdmin ? 0 : -1;
         if (isAdmin && editIndex === idx) {
           tr.classList.add('editing');
-          priceTd.innerHTML = `<input class="price-input" type="number" min="0" value="${item.price}" />`;
+          priceTd.innerHTML = `<input class="price-input" type="number" min="0" step="any" value="${item.price}" />`;
         } else {
           priceTd.textContent = item.price;
         }
