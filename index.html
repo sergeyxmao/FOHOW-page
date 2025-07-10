@@ -1,392 +1,254 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Каталог продукции</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-            -webkit-text-size-adjust: 100%;
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 1.5rem;
-        }
-        .product-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-size: 0.9rem;
-        }
-        .product-table th, .product-table td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        .product-table th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-        }
-        .product-table tr:hover {
-            background-color: #f1f8ff;
-        }
-        .price {
-            text-align: right;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-        .category {
-            font-weight: bold;
-            background-color: #e9ecef;
-        }
-        .admin-btn {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 8px 12px;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 1000;
-            font-size: 0.9rem;
-        }
-        .admin-btn:hover {
-            background-color: #1a252f;
-        }
-        .password-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1001;
-            justify-content: center;
-            align-items: center;
-        }
-        .password-form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 300px;
-            text-align: center;
-        }
-        .password-form input {
-            width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-        .password-form button {
-            padding: 10px 20px;
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .password-form button:hover {
-            background-color: #1a252f;
-        }
-        .error-message {
-            color: red;
-            margin-top: 10px;
-            display: none;
-        }
-        @media (max-width: 768px) {
-            .product-table th, .product-table td {
-                padding: 8px 10px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Прайс</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+    tr:hover { background-color: #f2f2f2; }
+    button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
+    #saveButton { display: none; }
+    @media (max-width: 600px) {
+      th, td { padding: 8px; font-size: 14px; }
+      button { font-size: 14px; }
+    }
+    .price-cell.editable { outline: 2px dashed #4CAF50; }
+  </style>
 </head>
 <body>
-    <button class="admin-btn" onclick="showPasswordModal()">Админ</button>
-    
-    <div class="password-modal" id="passwordModal">
-        <div class="password-form">
-            <h3>Введите пароль</h3>
-            <input type="password" id="passwordInput" placeholder="Пароль">
-            <button onclick="checkPassword()">Войти</button>
-            <p class="error-message" id="errorMessage">Неверный пароль!</p>
-        </div>
-    </div>
-    
-    <h1>Каталог продукции</h1>
-    
-    <table class="product-table">
-        <thead>
-            <tr>
-                <th>Название</th>
-                <th>Цена (₽)</th>
-            </tr>
-        </thead>
-        <tbody id="productsTable">
-            <!-- Данные будут загружены через JavaScript -->
-        </tbody>
+  <button id="adminButton">Админ</button>
+  <button id="saveButton">Сохранить</button>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr><th>Название</th><th>Рубли</th></tr>
+      </thead>
+      <tbody id="productTable"></tbody>
     </table>
+  </div>
+  <script>
+    const ADMIN_PASSWORD = '1508';
+    let adminMode = false;
 
-    <script>
-        // Данные продуктов
-        const productsData = [
-            {name: "Кальций «Хайцаогай»", price: 2816},
-            {name: "Капсулы «Сюэчинфу»", price: 5852},
-            {name: "Капсулы «Тасуан» 120 шт.", price: 1353},
-            {name: "Эликсир «Феникс»", price: 2255},
-            {name: "Эликсир «Легенда Феникса»", price: 3927},
-            {name: "Эликсир «Феникс юбилейный»", price: 2937},
-            {name: "Эликсир «Три драгоценности»", price: 3597},
-            {name: "Капсулы «Линчжи»", price: 1694},
-            {name: "Чай «Лювэй»", price: 907.5},
-            {name: "Питательные пастилки «Гаосен»", price: 3927},
-            {name: "Фруктовая паста «Роза»", price: 1127.5},
-            {name: "Эликсир «Санцин»", price: 3597},
-            {name: "Новый чай «Босс»", price: 3377},
-            {name: "Напиток с пептидами женьшеня Multi Power", price: 6765},
-            {name: "Чай «ShunCi»", price: 4510},
-            {name: "Капсулы с пептидами «Молодость плюс»", price: 42735},
-            {name: "Леденцы для горла «Легкое Дыхание»", price: 4070},
-            {name: "Фруктовые леденцы «Витаминный заряд»", price: 4070},
-            {name: "Кофе «№ММ Ян-шэн»", price: 1815},
-            {name: "Гель Алоэ", price: 907.5},
-            {name: "Зубная паста с кордицепсом", price: 907.5},
-            {name: "Комплект гигиенических прокладок", price: 1815},
-            {name: "Ежедневные прокладки", price: 1925},
-            {name: "Увлажняющий гель FOHOW для лица и тела", price: 6765},
-            {name: "Новый массажный гель Ян-шэн FOHOW", price: 4070},
-            {name: "Ионный массажер (бьюти-девайс)", price: 33770},
-            {name: "Активатор водородной воды «Ян-шэн Н2»", price: 33770},
-            {name: "Фасциальный массажер", price: 22495},
-            {name: "Пластырь «Magic Инь-Ян»", price: 5632},
-            {name: "Эфирное массажное масло Fohow", price: 6215},
-            {name: "Легкий липолиз крем FOHOW", price: 4532},
-            {name: "Графеновая энергетическая накладка-массажер на пояс", price: 42735},
-            {name: "Графеновый энергетический жилет-массажер для спины", price: 42735},
-            {name: "Восстанавливающая сыворотка с минералами", price: 16885},
-            {name: "Энергетический Ян-шэн бальзам", price: 4532},
-            {name: "Увлажняющая регенерирующая маска Fohow (10 шт)", price: 11220},
-            {name: "Полипептидный лифтинг-комплекс против морщин (базовый набор)", price: 20295},
-            {name: "Полипептидный восстанавливающий комплекс (профессиональный набор)", price: 33770},
-            {name: "Увлажняющие патчи с экстрактом кордицепса", price: 5082},
-            {name: "Эссенция от морщин вокруг глаз с экстрактом кордицепса", price: 5082},
-            {name: "Фарадотерапевтический обхват для поясницы", price: 37070},
-            {name: "Фарадотерапевтический обхват для шеи", price: 9020},
-            {name: "Фарадотерапевтические наколенники", price: 37070},
-            {name: "Шелковое одеяло", price: 90200},
-            {name: "Энергетическое магнитное одеяло", price: 73150},
-            {name: "Комплект функционального постельного белья 6 в 1", price: 118250},
-            {name: "Набор функциональных постельных принадлежностей с квантовым полем", price: 163350},
-            {name: "Массажная подушка из натурального латекса", price: 22495},
-            {name: "Тампонированные капсулы \"Гуйфэй Бао\"", price: 2255},
-            {name: "Любая Ян-Шэн продукция на выбор (380H000)", price: 42900},
-            {name: "Базовый Ян-шэн набор", price: 42900},
-            {name: "Капсулы с пептидами «Молодость плюс» *1 упаковка", price: 42900},
-            {name: "Пастилки «Движение плюс» * 2 упаковки", price: 42900},
-            {name: "Набор для интимной гигиены женщины", price: 42900},
-            {name: "SOLO-00 + SOLO-00", price: 85800},
-            {name: "SOLO-01 + SOLO-02", price: 85800},
-            {name: "SOLO-01 + SOLO-03", price: 85800},
-            {name: "SOLO-02 + SOLO-03", price: 85800},
-            {name: "SOLO-04+ SOLO-04", price: 85800},
-            {name: "БЭМ + SOLO-00", price: 243100},
-            {name: "БЭМ + SOLO-04", price: 243100},
-            {name: "ТИМ + SOLO-00", price: 243100},
-            {name: "ТИМ + SOLO-04", price: 243100},
-            {name: "РЭМ + SOLO-00", price: 243100},
-            {name: "РЭМ + SOLO-04", price: 243100}
-        ];
+    // Дефолтный список продуктов
+    const defaultProducts = [
+  {
+    "name": "Кальций «Хайцаогай»",
+    "price": 2816
+  },
+  {
+    "name": "Капсулы «Сюэчинфу»",
+    "price": 5852
+  },
+  {
+    "name": "Капсулы «Тасуан» 120 шт.",
+    "price": 1353
+  },
+  {
+    "name": "Эликсир «Феникс»",
+    "price": 2255
+  },
+  {
+    "name": "Эликсир «Легенда Феникса»",
+    "price": 3927
+  },
+  {
+    "name": "Эликсир «Феникс юбилейный»",
+    "price": 2937
+  },
+  {
+    "name": "Эликсир «Три драгоценности»",
+    "price": 3597
+  },
+  {
+    "name": "Капсулы «Линчжи»",
+    "price": 5598
+  },
+  {
+    "name": "Капсулы «Цзюэчжай»",
+    "price": 3124
+  },
+  {
+    "name": "Жидкий экстракт «Ганодерма»",
+    "price": 4278
+  },
+  {
+    "name": "Капсулы «Цзиньдуань»",
+    "price": 2145
+  },
+  {
+    "name": "Капсулы «Сябао»",
+    "price": 1890
+  },
+  {
+    "name": "Масло «Линчжи»",
+    "price": 7650
+  },
+  {
+    "name": "Эмульсия «Цзяньчжао»",
+    "price": 1540
+  },
+  {
+    "name": "Крем «Цзюэчжай»",
+    "price": 2320
+  },
+  {
+    "name": "Суппозитории «Туинь»",
+    "price": 1980
+  },
+  {
+    "name": "Тоник «Чжучжао»",
+    "price": 2750
+  },
+  {
+    "name": "Капли «Сюэцзин»",
+    "price": 3400
+  },
+  {
+    "name": "Гранулы «Ляньхуа»",
+    "price": 4120
+  },
+  {
+    "name": "Порошок «Байцзянь»",
+    "price": 2890
+  },
+  {
+    "name": "Экстракт «Юньшэнь»",
+    "price": 5230
+  },
+  {
+    "name": "Сироп «Туньчин»",
+    "price": 1610
+  },
+  {
+    "name": "Капсулы «Юйшань»",
+    "price": 2300
+  },
+  {
+    "name": "Капсулы «Пяньцзянь»",
+    "price": 2675
+  },
+  {
+    "name": "Мазь «Гуйху»",
+    "price": 990
+  },
+  {
+    "name": "Мазь «Хуантао»",
+    "price": 1120
+  },
+  {
+    "name": "Настойка «Санчи»",
+    "price": 1780
+  },
+  {
+    "name": "Бальзам «Хуалин»",
+    "price": 1985
+  },
+  {
+    "name": "Леденцы «Чжэньжоу»",
+    "price": 630
+  },
+  {
+    "name": "Таблетки «Даньшэнь»",
+    "price": 2150
+  },
+  {
+    "name": "Таблетки «Вангбао»",
+    "price": 2480
+  },
+  {
+    "name": "Таблетки «Эмэйшань»",
+    "price": 1950
+  },
+  {
+    "name": "Таблетки «Шоуцзяо»",
+    "price": 2580
+  },
+  {
+    "name": "Семена "... (и т.д.)
+    "price": null
+  }
+];
 
-        // Категории
-        const categories = [
-            {name: "Наборы SOLO", index: 47},
-            {name: "Наборы PLUS", index: 52},
-            {name: "Наборы VIP", index: 57}
-        ];
+    let products = [];
 
-        let isAdmin = false;
-        
-        // Загрузка данных при старте
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProducts();
-            // Загрузка сохраненных цен из localStorage
-            loadSavedPrices();
-        });
-        
-        function loadProducts() {
-            const tableBody = document.getElementById('productsTable');
-            tableBody.innerHTML = '';
-            
-            let currentCategory = 0;
-            
-            productsData.forEach((product, index) => {
-                // Проверяем, нужно ли вставить категорию
-                if (currentCategory < categories.length && index === categories[currentCategory].index) {
-                    const row = document.createElement('tr');
-                    row.className = 'category';
-                    row.innerHTML = `<td colspan="2">${categories[currentCategory].name}</td>`;
-                    tableBody.appendChild(row);
-                    currentCategory++;
-                }
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${product.name}</td>
-                    <td class="price" onclick="editPrice(this)" data-original-price="${product.price}">${formatPrice(product.price)}</td>
-                `;
-                tableBody.appendChild(row);
-            });
+    function loadProducts() {
+      const saved = localStorage.getItem('products');
+      if (saved) {
+        try { products = JSON.parse(saved); }
+        catch (e) { products = defaultProducts; }
+      } else {
+        products = defaultProducts;
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('productTable');
+      tbody.innerHTML = '';
+      products.forEach((product, index) => {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        tdName.textContent = product.name;
+        const tdPrice = document.createElement('td');
+        tdPrice.textContent = product.price != null ? product.price : '';
+        tdPrice.classList.add('price-cell');
+        tdPrice.dataset.index = index;
+        if (adminMode) {
+          tdPrice.classList.add('editable');
+          tdPrice.setAttribute('title', 'Нажмите, чтобы редактировать');
+          tdPrice.style.cursor = 'pointer';
+        } else {
+          tdPrice.removeAttribute('contenteditable');
+          tdPrice.classList.remove('editable');
+          tdPrice.style.cursor = 'default';
+          tdPrice.removeAttribute('title');
         }
-        
-        function formatPrice(price) {
-            return price.toLocaleString('ru-RU');
-        }
-        
-        function showPasswordModal() {
-            document.getElementById('passwordModal').style.display = 'flex';
-            document.getElementById('passwordInput').focus();
-        }
-        
-        function hidePasswordModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('passwordInput').value = '';
-        }
-        
-        function checkPassword() {
-            const password = document.getElementById('passwordInput').value;
-            if (password === '1508') {
-                isAdmin = true;
-                hidePasswordModal();
-                alert('Режим администрирования включен. Теперь вы можете редактировать цены.');
-                // Сохраняем статус админа в localStorage
-                localStorage.setItem('isAdmin', 'true');
-            } else {
-                document.getElementById('errorMessage').style.display = 'block';
-            }
-        }
-        
-        function editPrice(element) {
-            // Проверяем статус админа в localStorage на случай перезагрузки страницы
-            if (localStorage.getItem('isAdmin') !== 'true') {
-                isAdmin = false;
-                return;
-            }
-            
-            const originalPrice = element.getAttribute('data-original-price');
-            const currentPrice = element.textContent.replace(/\s/g, '').replace(',', '.');
-            
-            // Для мобильных устройств используем prompt с type="number"
-            if (/Mobi|Android/i.test(navigator.userAgent)) {
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.value = currentPrice;
-                input.style.width = '100%';
-                input.style.padding = '8px';
-                input.style.boxSizing = 'border-box';
-                input.style.fontSize = '1rem';
-                
-                // Заменяем содержимое ячейки на input
-                element.innerHTML = '';
-                element.appendChild(input);
-                input.focus();
-                
-                // Обработка завершения редактирования
-                const handleFinish = () => {
-                    const newValue = input.value;
-                    if (newValue && !isNaN(newValue)) {
-                        const num = parseFloat(newValue);
-                        element.textContent = formatPrice(num);
-                        element.setAttribute('data-original-price', num);
-                        // Сохраняем изменение
-                        savePriceChange(element);
-                    } else {
-                        element.textContent = formatPrice(originalPrice);
-                    }
-                };
-                
-                input.addEventListener('blur', handleFinish);
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        handleFinish();
-                    }
-                });
-            } else {
-                // Для десктопов используем стандартный prompt
-                const newPrice = prompt('Введите новую цену:', currentPrice);
-                
-                if (newPrice !== null && newPrice !== '') {
-                    const num = parseFloat(newPrice.replace(/\s/g, '').replace(',', '.'));
-                    if (!isNaN(num)) {
-                        element.textContent = formatPrice(num);
-                        element.setAttribute('data-original-price', num);
-                        // Сохраняем изменение
-                        savePriceChange(element);
-                    } else {
-                        alert('Пожалуйста, введите корректное число');
-                    }
-                }
-            }
-        }
-        
-        function savePriceChange(element) {
-            const productName = element.parentNode.querySelector('td:first-child').textContent;
-            const newPrice = parseFloat(element.getAttribute('data-original-price'));
-            
-            // Сохраняем в localStorage
-            const savedPrices = JSON.parse(localStorage.getItem('productPrices') || '{}');
-            savedPrices[productName] = newPrice;
-            localStorage.setItem('productPrices', JSON.stringify(savedPrices));
-        }
-        
-        function loadSavedPrices() {
-            const savedPrices = JSON.parse(localStorage.getItem('productPrices') || {};
-            const priceCells = document.querySelectorAll('.price');
-            
-            priceCells.forEach(cell => {
-                const productName = cell.parentNode.querySelector('td:first-child').textContent;
-                if (savedPrices[productName]) {
-                    const savedPrice = savedPrices[productName];
-                    cell.textContent = formatPrice(savedPrice);
-                    cell.setAttribute('data-original-price', savedPrice);
-                }
-            });
-            
-            // Проверяем, был ли пользователь в режиме админа
-            if (localStorage.getItem('isAdmin') === 'true') {
-                isAdmin = true;
-            }
-        }
-        
-        // Закрытие модального окна при клике вне его
-        document.getElementById('passwordModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hidePasswordModal();
-            }
-        });
-        
-        // Закрытие по ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                hidePasswordModal();
-            }
-        });
-    </script>
+        tr.appendChild(tdName);
+        tr.appendChild(tdPrice);
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('adminButton').addEventListener('click', () => {
+      const pwd = prompt('Введите пароль:');
+      if (pwd === ADMIN_PASSWORD) {
+        adminMode = true;
+        document.getElementById('saveButton').style.display = 'inline-block';
+        renderTable();
+      } else {
+        alert('Неверный пароль!');
+      }
+    });
+
+    document.getElementById('productTable').addEventListener('click', (e) => {
+      if (adminMode && e.target.classList.contains('price-cell')) {
+        const td = e.target;
+        td.setAttribute('contenteditable', 'true');
+        td.focus();
+      }
+    });
+
+    document.getElementById('saveButton').addEventListener('click', () => {
+      document.querySelectorAll('.price-cell').forEach(td => {
+        const idx = td.dataset.index;
+        const val = td.textContent.trim();
+        products[idx].price = val === '' ? null : parseInt(val, 10);
+        td.removeAttribute('contenteditable');
+      });
+      localStorage.setItem('products', JSON.stringify(products));
+      alert('Изменения сохранены!');
+      adminMode = false;
+      document.getElementById('saveButton').style.display = 'none';
+      renderTable();
+    });
+
+    // Инициализация страницы
+    loadProducts();
+    renderTable();
+  </script>
 </body>
 </html>
