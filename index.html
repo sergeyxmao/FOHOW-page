@@ -2,253 +2,214 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <title>Прайс-лист</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Прайс</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-    tr:hover { background-color: #f2f2f2; }
-    button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
-    #saveButton { display: none; }
-    @media (max-width: 600px) {
-      th, td { padding: 8px; font-size: 14px; }
-      button { font-size: 14px; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f5f6fa; }
+    .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 16px #0001; padding: 20px; }
+    h1 { font-size: 1.6em; margin-bottom: 20px; text-align: center; letter-spacing: 1px; }
+    .admin-btn { position: absolute; top: 20px; right: 24px; background: #228be6; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+    .admin-btn:active { background: #1559a5; }
+    table { width: 100%; border-collapse: collapse; font-size: 1em; margin-top: 16px; }
+    th, td { padding: 10px 8px; text-align: left; }
+    th { background: #f0f3fa; font-weight: 600; }
+    tr { transition: background 0.2s; }
+    tr:hover { background: #eaf6fd; }
+    td.price-cell { cursor: pointer; }
+    tr.editing { background: #d6f5e8 !important; }
+    input.price-input { width: 80px; padding: 6px; font-size: 1em; border: 1px solid #ccc; border-radius: 6px; }
+    .save-btn { display: none; margin-top: 14px; background: #14ae5c; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 1em; cursor: pointer; }
+    .save-btn.active { display: block; }
+    /* Модальное окно */
+    .modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0005; z-index: 10; align-items: center; justify-content: center; }
+    .modal { background: #fff; padding: 30px 20px; border-radius: 12px; box-shadow: 0 2px 12px #0004; min-width: 260px; }
+    .modal input { width: 100%; padding: 8px; font-size: 1.1em; margin-bottom: 16px; border-radius: 7px; border: 1px solid #c3c3c3;}
+    .modal label { font-size: 1em; margin-bottom: 12px; display: block; }
+    .modal .modal-btn { background: #228be6; color: #fff; border: none; padding: 8px 14px; border-radius: 7px; font-size: 1em; cursor: pointer; }
+    .modal .modal-btn:active { background: #1559a5; }
+    /* Мобилка */
+    @media (max-width: 700px) {
+      .container { max-width: 98vw; margin: 10px 1vw; padding: 12px; }
+      h1 { font-size: 1.2em; }
+      table, th, td { font-size: 0.97em; }
+      .admin-btn { right: 8px; top: 10px; padding: 8px 11px; font-size: 0.97em; }
+      .save-btn { font-size: 0.97em; }
+      .modal { min-width: 90vw; }
     }
-    .price-cell.editable { outline: 2px dashed #4CAF50; }
   </style>
 </head>
 <body>
-  <button id="adminButton">Админ</button>
-  <button id="saveButton">Сохранить</button>
-  <div class="table-container">
-    <table>
+  <button class="admin-btn" id="adminBtn">Админ</button>
+  <div class="container">
+    <h1>Прайс-лист</h1>
+    <table id="priceTable">
       <thead>
-        <tr><th>Название</th><th>Рубли</th></tr>
+        <tr>
+          <th>Название</th>
+          <th>Рубли</th>
+        </tr>
       </thead>
-      <tbody id="productTable"></tbody>
+      <tbody>
+        <!-- Товары тут -->
+      </tbody>
     </table>
+    <button class="save-btn" id="saveBtn">Сохранить</button>
+  </div>
+  <!-- Модальное окно -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <form id="adminForm" autocomplete="off">
+        <label for="adminPass">Введите пароль:</label>
+        <input type="password" id="adminPass" required autofocus maxlength="12">
+        <button type="submit" class="modal-btn">Войти</button>
+      </form>
+    </div>
   </div>
   <script>
-    const ADMIN_PASSWORD = '1508';
-    let adminMode = false;
+    // Исходные данные (ваш прайс)
+    const defaultData = [
+      {name: "Кальций «Хайцаогай»", price: 2816},
+      {name: "Капсулы «Сюэчинфу»", price: 5852},
+      {name: "Капсулы «Тасуан» 120 шт.", price: 1353},
+      {name: "Эликсир «Феникс»", price: 2255},
+      {name: "Эликсир «Легенда Феникса»", price: 3927},
+      {name: "Капсулы «Гай Бао»", price: 2981},
+      {name: "Капсулы «Линчжи»", price: 2118},
+      {name: "Капсулы «Саньцин»", price: 2243},
+      {name: "Эликсир «Три сокровища»", price: 2396},
+      {name: "Эликсир «Фу Син»", price: 2062},
+      {name: "Капсулы «Шэньсунь»", price: 2335},
+      {name: "Капсулы «Сюэгуан»", price: 1513},
+      {name: "Капсулы «Лювей»", price: 2488},
+      {name: "Капсулы «Тяньши»", price: 1771},
+      {name: "Капсулы «Майгун»", price: 2668},
+      {name: "Капсулы «Шенсунь»", price: 2335},
+      {name: "Капсулы «Цинцзы»", price: 1636},
+      {name: "Капсулы «Цзюфэн»", price: 1856},
+      {name: "Капсулы «Женьшень»", price: 2816},
+      {name: "Эликсир «Янкан»", price: 1792},
+      {name: "Капсулы «Фуянь»", price: 1974}
+    ];
 
-    // Дефолтный список продуктов
-    const defaultProducts = [
-  {
-    "name": "Кальций «Хайцаогай»",
-    "price": 2816
-  },
-  {
-    "name": "Капсулы «Сюэчинфу»",
-    "price": 5852
-  },
-  {
-    "name": "Капсулы «Тасуан» 120 шт.",
-    "price": 1353
-  },
-  {
-    "name": "Эликсир «Феникс»",
-    "price": 2255
-  },
-  {
-    "name": "Эликсир «Легенда Феникса»",
-    "price": 3927
-  },
-  {
-    "name": "Эликсир «Феникс юбилейный»",
-    "price": 2937
-  },
-  {
-    "name": "Эликсир «Три драгоценности»",
-    "price": 3597
-  },
-  {
-    "name": "Капсулы «Линчжи»",
-    "price": 5598
-  },
-  {
-    "name": "Капсулы «Цзюэчжай»",
-    "price": 3124
-  },
-  {
-    "name": "Жидкий экстракт «Ганодерма»",
-    "price": 4278
-  },
-  {
-    "name": "Капсулы «Цзиньдуань»",
-    "price": 2145
-  },
-  {
-    "name": "Капсулы «Сябао»",
-    "price": 1890
-  },
-  {
-    "name": "Масло «Линчжи»",
-    "price": 7650
-  },
-  {
-    "name": "Эмульсия «Цзяньчжао»",
-    "price": 1540
-  },
-  {
-    "name": "Крем «Цзюэчжай»",
-    "price": 2320
-  },
-  {
-    "name": "Суппозитории «Туинь»",
-    "price": 1980
-  },
-  {
-    "name": "Тоник «Чжучжао»",
-    "price": 2750
-  },
-  {
-    "name": "Капли «Сюэцзин»",
-    "price": 3400
-  },
-  {
-    "name": "Гранулы «Ляньхуа»",
-    "price": 4120
-  },
-  {
-    "name": "Порошок «Байцзянь»",
-    "price": 2890
-  },
-  {
-    "name": "Экстракт «Юньшэнь»",
-    "price": 5230
-  },
-  {
-    "name": "Сироп «Туньчин»",
-    "price": 1610
-  },
-  {
-    "name": "Капсулы «Юйшань»",
-    "price": 2300
-  },
-  {
-    "name": "Капсулы «Пяньцзянь»",
-    "price": 2675
-  },
-  {
-    "name": "Мазь «Гуйху»",
-    "price": 990
-  },
-  {
-    "name": "Мазь «Хуантао»",
-    "price": 1120
-  },
-  {
-    "name": "Настойка «Санчи»",
-    "price": 1780
-  },
-  {
-    "name": "Бальзам «Хуалин»",
-    "price": 1985
-  },
-  {
-    "name": "Леденцы «Чжэньжоу»",
-    "price": 630
-  },
-  {
-    "name": "Таблетки «Даньшэнь»",
-    "price": 2150
-  },
-  {
-    "name": "Таблетки «Вангбао»",
-    "price": 2480
-  },
-  {
-    "name": "Таблетки «Эмэйшань»",
-    "price": 1950
-  },
-  {
-    "name": "Таблетки «Шоуцзяо»",
-    "price": 2580
-  },
-  {
-    "name": "Семена "... (и т.д.)
-    "price": null
-  }
-];
-
-    let products = [];
-
-    function loadProducts() {
-      const saved = localStorage.getItem('products');
+    // Функция для загрузки данных из LocalStorage
+    function loadData() {
+      const saved = localStorage.getItem('priceData');
       if (saved) {
-        try { products = JSON.parse(saved); }
-        catch (e) { products = defaultProducts; }
-      } else {
-        products = defaultProducts;
+        try { return JSON.parse(saved); }
+        catch { return defaultData.slice(); }
       }
+      return defaultData.slice();
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('productTable');
+    // Функция для сохранения в LocalStorage
+    function saveData(data) {
+      localStorage.setItem('priceData', JSON.stringify(data));
+    }
+
+    // Рендер таблицы
+    function renderTable(isAdmin=false) {
+      const tbody = document.querySelector('#priceTable tbody');
       tbody.innerHTML = '';
-      products.forEach((product, index) => {
+      priceData.forEach((item, idx) => {
         const tr = document.createElement('tr');
-        const tdName = document.createElement('td');
-        tdName.textContent = product.name;
-        const tdPrice = document.createElement('td');
-        tdPrice.textContent = product.price != null ? product.price : '';
-        tdPrice.classList.add('price-cell');
-        tdPrice.dataset.index = index;
-        if (adminMode) {
-          tdPrice.classList.add('editable');
-          tdPrice.setAttribute('title', 'Нажмите, чтобы редактировать');
-          tdPrice.style.cursor = 'pointer';
+        const nameTd = document.createElement('td');
+        nameTd.textContent = item.name;
+        const priceTd = document.createElement('td');
+        priceTd.classList.add('price-cell');
+        priceTd.dataset.idx = idx;
+        priceTd.tabIndex = isAdmin ? 0 : -1;
+        if (isAdmin && editIndex === idx) {
+          tr.classList.add('editing');
+          priceTd.innerHTML = `<input class="price-input" type="number" min="0" value="${item.price}" />`;
         } else {
-          tdPrice.removeAttribute('contenteditable');
-          tdPrice.classList.remove('editable');
-          tdPrice.style.cursor = 'default';
-          tdPrice.removeAttribute('title');
+          priceTd.textContent = item.price;
         }
-        tr.appendChild(tdName);
-        tr.appendChild(tdPrice);
+        tr.appendChild(nameTd);
+        tr.appendChild(priceTd);
         tbody.appendChild(tr);
       });
     }
 
-    document.getElementById('adminButton').addEventListener('click', () => {
-      const pwd = prompt('Введите пароль:');
-      if (pwd === ADMIN_PASSWORD) {
-        adminMode = true;
-        document.getElementById('saveButton').style.display = 'inline-block';
-        renderTable();
+    let isAdmin = false;
+    let priceData = loadData();
+    let editIndex = null;
+
+    // Первичная отрисовка
+    renderTable();
+
+    // Модалка — админ вход
+    const adminBtn = document.getElementById('adminBtn');
+    const modalBg = document.getElementById('modalBg');
+    const adminForm = document.getElementById('adminForm');
+    adminBtn.onclick = () => {
+      modalBg.style.display = 'flex';
+      adminForm.reset();
+      setTimeout(()=>document.getElementById('adminPass').focus(), 200);
+    };
+    modalBg.onclick = e => { if (e.target === modalBg) modalBg.style.display = 'none'; };
+    adminForm.onsubmit = e => {
+      e.preventDefault();
+      const pass = document.getElementById('adminPass').value;
+      if (pass === '1508') {
+        isAdmin = true;
+        renderTable(true);
+        document.getElementById('saveBtn').classList.add('active');
+        modalBg.style.display = 'none';
       } else {
         alert('Неверный пароль!');
       }
-    });
+    };
 
-    document.getElementById('productTable').addEventListener('click', (e) => {
-      if (adminMode && e.target.classList.contains('price-cell')) {
-        const td = e.target;
-        td.setAttribute('contenteditable', 'true');
-        td.focus();
+    // Клик по цене — включить редактирование
+    document.querySelector('#priceTable tbody').onclick = function(e) {
+      if (!isAdmin) return;
+      const td = e.target.closest('.price-cell');
+      if (td && !td.querySelector('input')) {
+        editIndex = Number(td.dataset.idx);
+        renderTable(true);
+        const input = td.querySelector('input');
+        if (input) {
+          input.focus();
+          input.select();
+          input.onkeydown = ev => {
+            if (ev.key === 'Enter') {
+              input.blur();
+              document.getElementById('saveBtn').focus();
+            }
+          };
+        }
+      }
+    };
+
+    // Автоматически обновлять цену при вводе (после ухода с инпута)
+    document.querySelector('#priceTable tbody').addEventListener('focusout', function(e) {
+      if (!isAdmin || editIndex === null) return;
+      const input = e.target;
+      if (input.classList.contains('price-input')) {
+        const val = Number(input.value);
+        if (!isNaN(val) && val >= 0) {
+          priceData[editIndex].price = val;
+          renderTable(true);
+        }
+        editIndex = null;
       }
     });
 
-    document.getElementById('saveButton').addEventListener('click', () => {
-      document.querySelectorAll('.price-cell').forEach(td => {
-        const idx = td.dataset.index;
-        const val = td.textContent.trim();
-        products[idx].price = val === '' ? null : parseInt(val, 10);
-        td.removeAttribute('contenteditable');
-      });
-      localStorage.setItem('products', JSON.stringify(products));
-      alert('Изменения сохранены!');
-      adminMode = false;
-      document.getElementById('saveButton').style.display = 'none';
-      renderTable();
-    });
+    // Кнопка "Сохранить"
+    document.getElementById('saveBtn').onclick = function() {
+      saveData(priceData);
+      this.textContent = "Сохранено!";
+      setTimeout(() => { this.textContent = "Сохранить"; }, 1200);
+      renderTable(true);
+    };
 
-    // Инициализация страницы
-    loadProducts();
-    renderTable();
+    // При выходе из админки (по обновлению страницы)
+    window.onload = () => {
+      isAdmin = false;
+      editIndex = null;
+      renderTable();
+      document.getElementById('saveBtn').classList.remove('active');
+    };
   </script>
 </body>
 </html>
